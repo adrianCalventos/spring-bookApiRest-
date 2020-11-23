@@ -5,17 +5,18 @@ pipeline {
         pollSCM '* * * * *'
     }
     stages {
-        stage('Build') {
-            steps {
-            	sh 'chmod +x gradlew'
-                sh './gradlew assemble'
-            }
+        stage('Build Docker image'){
+        	steps {
+        		sh './gradlew docker'
+        	}
         }
-        stage('Test') {
-            steps {
-            	sh 'chmod +x gradlew'
-                sh './gradlew test'
-            }
+        stage('Push Docker image'){
+        	environment{
+        		DOCKER_HUB_LOGIN = credentials('docker-hub')
+        	}
+        	sh 'docker login --username=$DOCKER_HUB_LOGIN_USR --password=DOCKER_HUB_LOGIN_PSW'
+        	sh './gradlew dockerPush'
+        
         }
     }
 }
